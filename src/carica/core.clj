@@ -165,6 +165,18 @@
            ret)))
      {:carica/mem mem})))
 
+(defn env-override-config
+  "Config middleware that looks for :carica-env map in the config
+  and merges with the value of the key if it matches the CARICA_ENV env var."
+  [f]
+  (fn [resources]
+    (let [res (f resources)
+          environment (System/getenv "CARICA_ENV")]
+      (-> (if-let [env-map (get-in res [:carica-env environment])]
+            (merge res env-map)
+            res)
+          (dissoc :carica-env)))))
+
 (defn clear-config-cache!
   "Clear the cached config.  If a custom config function has been
   defined, it must be passed in."

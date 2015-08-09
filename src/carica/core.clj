@@ -169,13 +169,18 @@
   "Config middleware that looks for :carica-env map in the config
   and merges with the value of the key if it matches the CARICA_ENV env var."
   [f]
-  (fn [resources]
-    (let [res (f resources)
-          environment (System/getenv "CARICA_ENV")]
-      (-> (if-let [env-map (get-in res [:carica-env environment])]
-            (merge res env-map)
-            res)
-          (dissoc :carica-env)))))
+  (let [environment (System/getenv "CARICA_ENV")]
+    (fn [resources]
+      (let [res (f resources)]
+        (try
+          (-> (if-let [env-map (get-in res [:carica-env environment])]
+                (merge res env-map)
+                res)
+              (dissoc :carica-env))
+          (catch Exception e
+            (log/warn "Failed to merge env override " environment ": "
+                      (.getException e))
+            res))))))
 
 (defn clear-config-cache!
   "Clear the cached config.  If a custom config function has been

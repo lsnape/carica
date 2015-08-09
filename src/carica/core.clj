@@ -178,9 +178,7 @@
                 res)
               (dissoc :carica-env))
           (catch Exception e
-            (log/warn "Failed to merge env override " environment ": "
-                      (.getException e))
-            res))))))
+            (log/warn "Failed to merge env override" environment e)))))))
 
 (defn clear-config-cache!
   "Clear the cached config.  If a custom config function has been
